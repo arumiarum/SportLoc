@@ -62,8 +62,7 @@ function createApp(db) {
 
   // layer garis & poligon dari ArcGIS (GeoJSON) -> public/geo/
   app.get('/api/layers', (req, res) => {
-    const dir = path.join(__dirname, 'public', 'geo');
-    res.json({ kecamatan: fs.existsSync(path.join(dir, 'kecamatan.geojson')), jalan: fs.existsSync(path.join(dir, 'jalan.geojson')) });
+    res.json({ kecamatan: true, jalan: true });
   });
 
   // ---------- admin ----------

@@ -1,10 +1,6 @@
-let Database;
-try {
-  Database = require('better-sqlite3');
-} catch (e) {
-  Database = null;
-}
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
+// Gunakan require agar Vercel otomatis membundle data JSON ke dalam serverless function
+const seed = require('./data/seed.json');
 
 function hashPassword(pw) {
   const salt = crypto.randomBytes(16).toString('hex');
@@ -17,8 +13,6 @@ function verifyPassword(pw, stored) {
 }
 
 function createMemoryDb() {
-  const seedPath = path.join(__dirname, 'data', 'seed.json');
-  const seed = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
   let jenisList = [...new Set(seed.map(s => s.jenis))].map((nama, idx) => ({
     id_jenis: idx + 1,
     nama_jenis: nama
@@ -193,29 +187,37 @@ function createMemoryDb() {
   };
 }
 
+let cachedDb = null;
 function open(file = process.env.DB_FILE) {
-  // If on Vercel or if Database module is not available, use the memory database
-  if (process.env.VERCEL || !Database) {
-    return createMemoryDb();
+  if (cachedDb) return cachedDb;
+  // Jika ada better-sqlite3 dan bukan Vercel, coba SQLite lokal
+  if (!process.env.VERCEL) {
+    try {
+      const Database = require('better-sqlite3');
+      if (!file) file = path.join(__dirname, 'data', 'webgis.db');
+      if (process.argv.includes('--reset') && file.endsWith('webgis.db') && fs.existsSync(file)) fs.unlinkSync(file);
+      const db = new Database(file);
+      db.pragma('foreign_keys = ON');
+      db.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
+      if (db.prepare('SELECT COUNT(*) c FROM lokasi').get().c === 0) {
+        const jenis = [...new Set(seed.map(s => s.jenis))];
+        const insJ = db.prepare('INSERT INTO jenis_olahraga(nama_jenis) VALUES (?)');
+        jenis.forEach(j => insJ.run(j));
+        const idJ = Object.fromEntries(db.prepare('SELECT * FROM jenis_olahraga').all().map(r => [r.nama_jenis, r.id_jenis]));
+        const ins = db.prepare(`INSERT INTO lokasi(kode,nama,id_jenis,latitude,longitude,alamat,kecamatan,jam,tarif,fasilitas,foto)
+          VALUES (@kode,@nama,@id_jenis,@latitude,@longitude,@alamat,@kecamatan,@jam,@tarif,@fasilitas,@foto)`);
+        db.transaction(() => seed.forEach(s => ins.run({ ...s, id_jenis: idJ[s.jenis] })))();
+      }
+      if (db.prepare('SELECT COUNT(*) c FROM admin').get().c === 0)
+        db.prepare('INSERT INTO admin(username,password) VALUES (?,?)').run('admin', hashPassword(process.env.ADMIN_PASSWORD || 'admin123'));
+      cachedDb = db;
+      return db;
+    } catch (e) {
+      // Fallback ke Memory DB jika better-sqlite3 gagal
+    }
   }
-  if (!file) file = path.join(__dirname, 'data', 'webgis.db');
-  if (process.argv.includes('--reset') && file.endsWith('webgis.db') && fs.existsSync(file)) fs.unlinkSync(file);
-  const db = new Database(file);
-  db.pragma('foreign_keys = ON');
-  db.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8'));
-  if (db.prepare('SELECT COUNT(*) c FROM lokasi').get().c === 0) {
-    const seed = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'seed.json'), 'utf8'));
-    const jenis = [...new Set(seed.map(s => s.jenis))];
-    const insJ = db.prepare('INSERT INTO jenis_olahraga(nama_jenis) VALUES (?)');
-    jenis.forEach(j => insJ.run(j));
-    const idJ = Object.fromEntries(db.prepare('SELECT * FROM jenis_olahraga').all().map(r => [r.nama_jenis, r.id_jenis]));
-    const ins = db.prepare(`INSERT INTO lokasi(kode,nama,id_jenis,latitude,longitude,alamat,kecamatan,jam,tarif,fasilitas,foto)
-      VALUES (@kode,@nama,@id_jenis,@latitude,@longitude,@alamat,@kecamatan,@jam,@tarif,@fasilitas,@foto)`);
-    db.transaction(() => seed.forEach(s => ins.run({ ...s, id_jenis: idJ[s.jenis] })))();
-  }
-  if (db.prepare('SELECT COUNT(*) c FROM admin').get().c === 0)
-    db.prepare('INSERT INTO admin(username,password) VALUES (?,?)').run('admin', hashPassword(process.env.ADMIN_PASSWORD || 'admin123'));
-  return db;
+  cachedDb = createMemoryDb();
+  return cachedDb;
 }
 
 module.exports = { open, verifyPassword, hashPassword };
