@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SportLoc — Peta Lapangan & Fasilitas Olahraga Kota Palu</title>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="vendor/markercluster/MarkerCluster.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>SportLoc <small>30 lapangan dan fasilitas hasil survei</small></h1>
+  <a href="admin.html">Admin</a>
+</header>
+
+<div id="app">
+  <aside id="side">
+    <div class="score">
+      <div class="hot"><b id="sTampil">0</b><span>Tampil</span></div>
+      <div><b id="sJenis">0</b><span>Jenis</span></div>
+      <div><b id="sKec">0</b><span>Kecamatan</span></div>
+    </div>
+
+    <div class="ctl">
+      <div class="search">
+        <input type="text" id="q" placeholder="Cari nama lapangan atau alamat" autocomplete="off">
+        <button id="qClear" title="Hapus pencarian">&times;</button>
+      </div>
+      <span class="lbl">Jenis olahraga</span>
+      <div class="chips" id="chips"></div>
+      <span class="lbl">Kecamatan</span>
+      <select id="kec"></select>
+      <div class="btns">
+        <button class="btn clay grow" id="near">Terdekat dari saya</button>
+        <button class="btn ghost" id="reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab on" data-tab="list">Daftar</button>
+      <button class="tab" data-tab="stat">Sebaran</button>
+    </div>
+    <div class="pane" id="paneList">
+      <div class="resinfo"><span id="resText"></span><button id="sortBtn">Urut A-Z</button></div>
+      <div id="list"></div>
+    </div>
+    <div class="pane" id="paneStat" hidden>
+      <div class="bars" id="bars"></div>
+      <div class="note">Klik batang untuk menyaring kecamatan. Jumlah mengikuti pencarian dan jenis olahraga yang dipilih.</div>
+    </div>
+  </aside>
+
+  <main id="map">
+    <button id="fitbtn" class="mapbox">Lihat semua</button>
+    <div id="basebox" class="mapbox"><button class="on" data-b="osm">Peta</button><button data-b="sat">Satelit</button></div>
+    <div id="laybox" class="mapbox">
+      <h4>Layer peta</h4>
+      <label id="lyKecL"><input type="checkbox" id="lyKec"><span class="sw pl" style="--c:#7a4f9a"></span>Batas kecamatan</label>
+      <label id="lyJlnL"><input type="checkbox" id="lyJln"><span class="sw" style="--c:#b08b3a"></span>Jaringan jalan</label>
+    </div>
+    <div id="legend" class="mapbox"><h4>Keterangan</h4><div id="legBox"></div></div>
+
+    <article id="detail" class="mapbox">
+      <div class="ph" id="dPh"><button class="x" id="dX" title="Tutup">&times;</button><span class="tag" id="dTag"></span></div>
+      <div class="bd">
+        <h2 id="dNama"></h2><div class="kd" id="dKode"></div>
+        <dl id="dInfo"></dl>
+        <div class="btns" style="margin:0">
+          <a class="btn grow" id="dRute" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Rute</a>
+          <button class="btn ghost" id="dCopy">Salin koordinat</button>
+        </div>
+      </div>
+    </article>
+  </main>
+</div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/markercluster/leaflet.markercluster.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

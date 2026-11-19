@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin — SportLoc</title>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css"><link rel="stylesheet" href="style.css"></head><body>
+<header><h1>SportLoc Admin — Kelola Data Lokasi</h1><a href="index.html">Ke peta publik</a></header>
+<div class="wrap">
+<div class="card" id="loginBox"><h3>Login Administrator</h3><div class="grid"><div><label>Username</label><input type="text" id="u"></div><div><label>Password</label><input type="password" id="p"></div></div>
+<div class="row"><button id="btnLogin">Masuk</button></div><div id="loginMsg"></div></div>
+<div id="panel" style="display:none">
+<div class="card"><div style="display:flex;justify-content:space-between"><h3 style="margin:0">Daftar Lokasi (<span id="cnt">0</span>)</h3><span><button class="sec" id="btnNew">+ Tambah lokasi</button> <button class="sec" id="btnOut">Keluar</button></span></div>
+<div style="max-height:320px;overflow:auto;margin-top:8px"><table class="t"><thead><tr><th>Kode</th><th>Nama</th><th>Jenis</th><th>Kecamatan</th><th>Aksi</th></tr></thead><tbody id="rows"></tbody></table></div></div>
+<div class="card" id="formCard" style="display:none"><h3 id="fTitle">Tambah Lokasi</h3><div id="fMsg"></div>
+<div class="grid"><div><label>Kode (kosong = otomatis)</label><input type="text" id="kode"></div><div><label>Nama *</label><input type="text" id="nama"></div>
+<div><label>Jenis olahraga *</label><select id="id_jenis"></select></div><div><label>Kecamatan</label><input type="text" id="kecamatan"></div>
+<div><label>Latitude * (negatif, LS)</label><input type="number" step="any" id="latitude"></div><div><label>Longitude * (BT)</label><input type="number" step="any" id="longitude"></div>
+<div class="full"><label>Alamat</label><input type="text" id="alamat"></div><div><label>Jam operasional</label><input type="text" id="jam"></div><div><label>Tarif</label><input type="text" id="tarif"></div>
+<div class="full"><label>Fasilitas</label><textarea id="fasilitas" rows="2"></textarea></div>
+<div><label>Foto (hotlink / path)</label><input type="text" id="foto"></div><div><label>Atau unggah foto baru</label><input type="file" id="fotoFile" accept="image/*"></div></div>
+<label style="margin-top:8px">Klik peta untuk mengisi koordinat</label><div id="pick"></div>
+<div class="row"><button id="btnSave">Simpan</button><button class="sec" id="btnCancel">Batal</button></div></div></div></div>
+<script src="vendor/leaflet/leaflet.js"></script><script src="admin.js"></script></body></html>
