@@ -11,7 +11,18 @@ function verifyPassword(pw, stored) {
   return crypto.timingSafeEqual(h, Buffer.from(hash, 'hex'));
 }
 
-function open(file = process.env.DB_FILE || path.join(__dirname, 'data', 'webgis.db')) {
+function open(file = process.env.DB_FILE) {
+  if (!file) {
+    if (process.env.VERCEL) {
+      file = '/tmp/webgis.db';
+      const srcDb = path.join(__dirname, 'data', 'webgis.db');
+      if (!fs.existsSync(file) && fs.existsSync(srcDb)) {
+        fs.copyFileSync(srcDb, file);
+      }
+    } else {
+      file = path.join(__dirname, 'data', 'webgis.db');
+    }
+  }
   if (process.argv.includes('--reset') && file.endsWith('webgis.db') && fs.existsSync(file)) fs.unlinkSync(file);
   const db = new Database(file);
   db.pragma('foreign_keys = ON');
